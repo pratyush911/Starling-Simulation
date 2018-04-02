@@ -3,14 +3,15 @@ import java.util.Comparator;
 
 
 class Boid implements Comparator<Boid>{
-  
+   ArrayList<Boid> neighbourboids3D  = new ArrayList<Boid>();
+   int iter;;
   PVector position;
   PVector velocity;
   PVector acceleration;
   float r;
   float maxce = 0.1;    // Maximum steering force
   float maxforce = 0.1;
-  float maxspeed=2.0;    // Maximum speed
+  float maxspeed=80.0;    // Maximum speed
   float flap = 0;
   float t = 0;
 
@@ -49,32 +50,48 @@ class Boid implements Comparator<Boid>{
     return steer;
   }
   
-  PVector rule1(ArrayList<Boid> neighbourboids){//cohesion
+  PVector rule1(ArrayList<Boid> neighbourboids3D){//cohesion
     PVector pc = new PVector(0,0,0);
-    int neighbours=0;
-    for(Boid other: neighbourboids){
-        float d = PVector.dist(position, other.position);
-        if(d<500){        
+    
+    for(Boid other: neighbourboids3D){
+        //float d = PVector.dist(position, other.position);
+        //if(d<500){        
           pc.add(other.position);
-          neighbours++;
-      }
+         
+      //}
     }
-    pc.div(neighbours);
-    return (pc.sub(position));//.normalize();
+    int neighbours=neighbourboids3D.size();
+    if (neighbours>0){
+        pc.div(neighbours);
+    return (pc.sub(position));}//.normalize();
+        //return (rule5(pc));}
+    else 
+      return new PVector(0,0,0);
   }
 
-  PVector rule2(ArrayList<Boid> neighbourboids){//separation
+  PVector rule2(ArrayList<Boid> neighbourboids3D){//separation
     PVector c = new PVector(0,0,0);
-
-    for(Boid other: neighbourboids){
+  int count = 0;
+    for(Boid other: neighbourboids3D){
         float d = PVector.dist(position, other.position);
-        if(d>0 && d<50){
+        if(d>0 && d<25){
           PVector  br = PVector.sub(position, other.position);
           br.normalize();
           br.div(d);
           c.add(br);
+          count++;
         }
       
+    }
+    if (count > 0) {
+      c.div((float)count);
+    }
+
+    if (c.mag() > 0) {
+      c.normalize();
+      c.mult(maxspeed);
+      c.sub(velocity);
+      c.limit(maxforce);
     }
 
     //c.normalize();
@@ -84,27 +101,37 @@ class Boid implements Comparator<Boid>{
     return c;
   }
 
-  PVector rule3(ArrayList<Boid> neighbourboids){ // Alginment
+  PVector rule3(ArrayList<Boid> neighbourboids3D){ // Alginment
     PVector pv = new PVector(0,0,0);
 
     int neighbours=0;
 
-    for(Boid other: neighbourboids){
+    for(Boid other: neighbourboids3D){
       //if(this!= other){
         float d = PVector.dist(position, other.position);
-        if( d<500){
+        if( d<25){
           pv.add(velocity);
           neighbours++;
         }
       //}
     }
 
-    pv.div(neighbours);
-    pv.limit(maxforce);
-    return (pv);
+    if (neighbours > 0) {
+        pv.div((float)neighbours);
+        pv.normalize();
+        pv.mult(maxspeed);
+        PVector steer = PVector.sub(pv, velocity);
+        steer.limit(maxforce);
+        return steer;
+      } 
+      else {
+        return new PVector(0, 0, 0);
+      } 
   }
   
-  PVector roost() {
+  
+  
+  PVector rule4() {
     PVector roostPos= new PVector(width/2,height/2,600);
     
     //calculate vertical force
@@ -128,21 +155,33 @@ class Boid implements Comparator<Boid>{
     steer.add(modPosDiff);
     return steer;
   }
-  
+   PVector rule5(PVector target) {//seek
+    PVector desired = PVector.sub(target, position);  // A vector pointing from the position to the target
+    // Normalize desired and scale to maximum speed
+    desired.normalize();
+    desired.mult(maxspeed);
+    // Steering = Desired minus Velocity
+    PVector steer = PVector.sub(desired, velocity);
+    steer.limit(maxforce);  // Limit to maximum steering force
+    return steer;
+}
+
+
+   ArrayList<Boid> nearestneighbours_modified() {
+    ArrayList<Boid> closestBoidsTemp=new ArrayList<Boid>(boids3D);
+      for (int i = 0; i< boids3D.size(); i++){
+        float d = PVector.dist(position, boids3D.get(i).position);
+        if( d<25 ){//&& d>0){
+        closestBoidsTemp.add(boids3D.get(i));
+        }
+      }
+      return closestBoidsTemp;
+   }
     ArrayList<Boid> nearestNeighbours() {
-    ArrayList<Boid> closestBoidsTemp=new ArrayList<Boid>(boids); // copy-constructor to avoid reaching out of our scope
-    closestBoidsTemp.remove(this); // avoids considering ourselves
-    
-    //float[] distance_Boid = new float[boids.size()];
-    //for (int i = 0; i< boids.size(); i++){
-    //  distance_Boid[ia] = PVector.dist(this.position, boids.get(i).position);
-    //}
+    ArrayList<Boid> closestBoidsTemp=new ArrayList<Boid>(boids3D); // copy-constructor to avoid reaching out of our scope
+    closestBoidsTemp.remove(this); // avoids considering ourselve
     Collections.sort(closestBoidsTemp, this);
-    //for (int i =0; i< closestBoidsTemp.size(); i++){
-      
-    //}
     ArrayList<Boid> closestBoids = new ArrayList();
-    //int min = min(6, boids.size());
     if (closestBoidsTemp.size() < 7){
       closestBoids = closestBoidsTemp;
     }
@@ -154,11 +193,16 @@ class Boid implements Comparator<Boid>{
         return closestBoids;
   }
   void update() {
-    ArrayList<Boid> neighbourboids = nearestNeighbours(); 
-    PVector v1 = this.rule1(neighbourboids);
-    PVector v2 = this.rule2(neighbourboids);
-    PVector v3 = this.rule3(neighbourboids);
-    PVector v4= this.roost();
+    
+     if (iter>10){
+      neighbourboids3D = nearestneighbours_modified(); 
+      iter = 0;
+    }
+    else iter ++;
+    PVector v1 = this.rule1(neighbourboids3D);
+    PVector v2 = this.rule2(neighbourboids3D);
+    PVector v3 = this.rule3(neighbourboids3D);
+    PVector v4= this.rule4();//roosting
     
     
       acceleration.add(PVector.mult(avoid(new PVector(position.x, 0, position.z)), 5));
@@ -168,14 +212,14 @@ class Boid implements Comparator<Boid>{
       acceleration.add(PVector.mult(avoid(new PVector(position.x, position.y, 300)), 0.1));
       acceleration.add(PVector.mult(avoid(new PVector(position.x, position.y, 900)), 0.1));
     
-    applyForce(v1.mult(0.001));
-    applyForce(v2.mult(1000000));
-    applyForce(v3.mult(0.00001));
-    applyForce(v4.mult(0.00001));
+    applyForce(v1.mult(1));
+    applyForce(v2.mult(1.5));
+    applyForce(v3.mult(0.1));
+    applyForce(v4.mult(0.1));
     acceleration.limit(maxforce);
     velocity.add(acceleration);
     velocity.limit(maxspeed);
-    velocity.add(wind);
+    //velocity.add(wind);
     position.add(velocity);
     acceleration.mult(0);
     
