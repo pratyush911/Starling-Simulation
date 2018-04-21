@@ -1,6 +1,7 @@
-ArrayList<Vehicle> boids;
+import java.util.*;
+ArrayList<Boid> boids;
 
-class Vehicle {
+class Boid {
   
   PVector position;
   PVector velocity;
@@ -9,9 +10,9 @@ class Vehicle {
   float maxforce;    // Maximum steering force
   float maxspeed;    // Maximum speed
 
-  Vehicle(float x, float y) {
+  Boid(float x, float y) {
     //acceleration = new PVector(0,0);
-    velocity = new PVector(0,-1);
+    velocity = new PVector((float)Math.random(),(float)Math.random());
     position = new PVector(x,y);
     r = 6;
     maxspeed = 4;
@@ -20,7 +21,7 @@ class Vehicle {
 
   PVector rule1(){//cohesion
     PVector pc = new PVector(0,0);
-    for(Vehicle other: boids){
+    for(Boid other: boids){
       if(this != other){
         pc.add(other.position);
       }
@@ -34,7 +35,7 @@ class Vehicle {
   PVector rule2(){//separation
     PVector c = new PVector(0,0);
 
-    for(Vehicle other: boids){
+    for(Boid other: boids){
       if(this != other){
         float d = PVector.dist(other.position, position);
         if(d<25){
@@ -50,7 +51,7 @@ class Vehicle {
   PVector rule3(){
     PVector pv = new PVector(0,0);
 
-    for(Vehicle other: boids){
+    for(Boid other: boids){
       if(this!= other){
         pv.add(velocity);
       }
@@ -100,7 +101,7 @@ class Vehicle {
     stroke(0);
     strokeWeight(1);
     pushMatrix();
-    translate(position.x % 640,position.y % 360);
+    translate(position.x, position.y);
     rotate(theta);
     beginShape();
     vertex(0, -r*2);
@@ -119,14 +120,19 @@ class Vehicle {
 void setup() {
   size(800, 600);
 
-  boids = new ArrayList<Vehicle>();
+  boids = new ArrayList<Boid>();
   for(int i=0; i<10; i++){
-  Vehicle v = new Vehicle(width/2, height/2);
+  Boid v = new Boid(width/2, height/2);
   boids.add(v);
-  // Vehicle v1 = new Vehicle(width/2-1, height/2+1);
+  // Boid v1 = new Boid(width/2-1, height/2+1);
   // boids.add(v1);
       System.out.println("here123");
    }
+}
+
+void mouseClicked(){
+  Boid v = new Boid(mouseX, mouseY);
+  boids.add(v);
 }
 
 void draw() {
@@ -136,16 +142,16 @@ void draw() {
 
   // Draw an ellipse at the mouse position
   fill(200);
-  stroke(0);
+  stroke(0);  
   strokeWeight(2);
   ellipse(mouse.x, mouse.y, 48, 48);
 
   // Call the appropriate steering behaviors for our agents
   // v.seek(mouse);
-  for(Vehicle other: boids){
+  for(Boid other: boids){
     other.update();
   }
-  for(Vehicle other: boids){
+  for(Boid other: boids){
     other.display();
   }
 }
