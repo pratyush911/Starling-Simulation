@@ -1,64 +1,87 @@
-ArrayList<Vehicle> boids;
+import java.util.*;
+ArrayList<Boid> boids;
 
-class Vehicle {
+class Boid {
   
   PVector position;
   PVector velocity;
-  //PVector acceleration;
+  PVector acceleration;
   float r;
   float maxforce;    // Maximum steering force
-  float maxspeed;    // Maximum speed
+  float maxspeed=2.0;    // Maximum speed
 
-  Vehicle(float x, float y) {
-    //acceleration = new PVector(0,0);
-    velocity = new PVector(0,-1);
-    position = new PVector(x,y);
+  color col;
+  Boid(float x, float y, float z) {
+    acceleration = new PVector(0,0,0);
+    velocity = new PVector((float)Math.random(),(float)Math.random(),(float)Math.random());
+    position = new PVector(x,y,z);
     r = 6;
-    maxspeed = 4;
     maxforce = 0.1;
+    
+  }
+
+  void applyForce(PVector force) {
+      // We could add mass here if we want A = F / M
+      acceleration.add(force);
   }
 
   PVector rule1(){//cohesion
-    PVector pc = new PVector(0,0);
-    for(Vehicle other: boids){
+    PVector pc = new PVector(0,0,0);
+    int neighbours=0;
+    for(Boid other: boids){
       if(this != other){
-        pc.add(other.position);
+        float d = PVector.dist(other.position, position);
+        //if(d<50){        
+          pc.add(other.position);
+          neighbours++;
+        //}
       }
     }
 
-    pc.div(boids.size()-1);
+    pc.div(neighbours);
 
-    return (pc.sub(position)).div(100);
+    return (pc.sub(position)).div(10000);
   }
 
   PVector rule2(){//separation
-    PVector c = new PVector(0,0);
+    PVector c = new PVector(0,0,0);
 
-    for(Vehicle other: boids){
+    for(Boid other: boids){
       if(this != other){
         float d = PVector.dist(other.position, position);
         if(d<25){
           PVector  br = PVector.sub(other.position, position);
+          br.normalize();
           c.sub(br);
         }
       }
     }
 
+    c.normalize();
+    //c.mult(maxspeed);
+    //c.sub(velocity);
+    c.limit(maxforce);
     return c;
   }
 
-  PVector rule3(){
-    PVector pv = new PVector(0,0);
+  PVector rule3(){ // Alginment
+    PVector pv = new PVector(0,0,0);
 
-    for(Vehicle other: boids){
+    int neighbours=0;
+
+    for(Boid other: boids){
       if(this!= other){
-        pv.add(velocity);
+        float d = PVector.dist(other.position, position);
+        //if(d<50){
+          pv.add(velocity);
+          neighbours++;
+        //}
       }
     }
 
-    pv.div(boids.size() - 1);
+    pv.div(neighbours);
 
-    return (pv.sub(velocity)).div(8);
+    return (pv.sub(velocity)).div(8000);
   }
 
   void update() {
@@ -66,11 +89,14 @@ class Vehicle {
     PVector v2 = this.rule2();
     PVector v3 = this.rule3();
 
-    velocity.add(v1);
-    velocity.add(v2);
-    velocity.add(v3);
+    applyForce(v1);
+    applyForce(v2);
+    applyForce(v3);
+    
+    velocity.add(acceleration);
     velocity.limit(maxspeed);
     position.add(velocity);
+    acceleration.mult(0);
   }
 
   // void applyForce(PVector force) {
@@ -94,13 +120,13 @@ class Vehicle {
   // }
     
   void display() {
-    // Draw a triangle rotated in the direction of velocity
+    // Draw a triangle rotated in the direction of velocityha
     float theta = velocity.heading2D() + PI/2;
     fill(127);
     stroke(0);
     strokeWeight(1);
     pushMatrix();
-    translate(position.x % 640,position.y % 360);
+    translate(position.x, position.y,position.z);
     rotate(theta);
     beginShape();
     vertex(0, -r*2);
@@ -117,35 +143,60 @@ class Vehicle {
 
 //  initialise_positions()
 void setup() {
-  size(800, 600);
+  size(1920, 1080);
 
-  boids = new ArrayList<Vehicle>();
-  for(int i=0; i<10; i++){
-  Vehicle v = new Vehicle(width/2, height/2);
-  boids.add(v);
-  // Vehicle v1 = new Vehicle(width/2-1, height/2+1);
-  // boids.add(v1);
-      System.out.println("here123");
-   }
+  boids = new ArrayList<Boid>();
+  for(int i=0; i<1000; i++){
+    Boid v = new Boid(width/2, height/2,0);
+    boids.add(v);
+  }
+}
+
+void settings(){
+  size(displayWidth, displayHeight, P3D);
+}
+
+//void mousePressed(){
+//  Boid v = new Boid(mouseX, mouseY,0);
+//  boids.add(v);
+//  System.out.println("here123");
+
+//}
+
+void keyPressed(){
+    //LURD
+    if (key == 'a')
+        rotateX(1);
+    else if (key == 's')
+        rotateY(100);
+    else if (keyCode == UP)
+        rotateX(1);
+    else if (keyCode == UP)
+        rotateY(1);
+     
+    if (key == 'a' ){
+       Boid v = new Boid(mouseX, mouseY,0);
+       boids.add(v);
+    }
 }
 
 void draw() {
-  background(255);
+  background(0);
 
   PVector mouse = new PVector(mouseX, mouseY);
 
   // Draw an ellipse at the mouse position
   fill(200);
-  stroke(0);
+  stroke(0);  
   strokeWeight(2);
   ellipse(mouse.x, mouse.y, 48, 48);
 
   // Call the appropriate steering behaviors for our agents
   // v.seek(mouse);
-  for(Vehicle other: boids){
+  for(Boid other: boids){
     other.update();
   }
-  for(Vehicle other: boids){
+  for(Boid other: boids){
     other.display();
   }
 }
