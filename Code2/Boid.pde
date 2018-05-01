@@ -154,7 +154,7 @@ class Boid implements Comparator<Boid>{
         return closestBoids;
   }
   void update() {
-    ArrayList<Boid> neighbourboids = nearestNeighbours(); 
+    ArrayList<Boid> neighbourboids = boids;//nearestNeighbours(); 
     PVector v1 = this.rule1(neighbourboids);
     PVector v2 = this.rule2(neighbourboids);
     PVector v3 = this.rule3(neighbourboids);

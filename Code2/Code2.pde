@@ -18,8 +18,8 @@ void setup() {
   size(1920, 1080, P3D);
 
   boids = new ArrayList<Boid>();
-  for(int i=0; i<4; i++){
-    Boid v = new Boid(random(width/10, width*9/10), random(height/10, height*9/10), random(300,900));
+  for(int i=0; i<4000; i++){
+    Boid v = new Boid(random(-2*width, 2*width), random(-2*height, 2*height), random(300,900));
     boids.add(v);
   }
 }
@@ -49,12 +49,12 @@ void keyPressed(){
     else if (keyCode == UP){
         zoom += 100;
     }
-    //else if (keyCode == LEFT){
-    //    horiz_trans -= 100;
-    //}
-    //else if (keyCode == RIGHT){
-    //    horiz_trans += 100;
-    //}
+    else if (keyCode == LEFT){
+        horiz_trans -= 100;
+    }
+    else if (keyCode == RIGHT){
+        horiz_trans += 100;
+    }
      
     
 }
@@ -64,7 +64,7 @@ void draw() {
   background(#7ec0ee);
   beginCamera();
   camera();
-  translate(0,0,zoom);
+  translate(horiz_trans,0,zoom);
   endCamera();
   directionalLight(255,255,255, 0, 1, -100);
   
@@ -82,7 +82,7 @@ void draw() {
   //}
   //else {wind_changer = 0.56;}
   wind_changer +=0.01;
-  wind.x = 0.02*sin(wind_changer);
+  wind.x = 0.08*sin(wind_changer);
   //wind.z = 0.02*cos(wind_changer);
   //wind.z =  0.05*sin(wind_changer)* 0.05*cos(wind_changer);
    textSize(400);
@@ -100,9 +100,12 @@ void draw() {
   strokeWeight(2);
   ellipse(mouse.x, mouse.y, 48, 48);
   float av_speed_sq_temp = 0;
-  for(Boid other: boids){
-     Runnable temp= new MyThread(other);
+  int n = boids.size();
+  for(int i = 0; i< n; i = i + n/10){
+     Runnable temp= new MyThread(i*10/n);
      new Thread(temp).start();
+  }
+  for (Boid other: boids){
      other.display();
      av_speed_sq_temp += (other.velocity.mag())*(other.velocity.mag());}
   // Call the appropriate steering behaviors for our agents
