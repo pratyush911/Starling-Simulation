@@ -8,7 +8,8 @@ class Boid implements Comparator<Boid>{
   PVector velocity;
   PVector acceleration;
   float r;
-  float maxforce = 0.1;    // Maximum steering force
+  float maxce = 0.1;    // Maximum steering force
+  float maxforce = 0.1;
   float maxspeed=2.0;    // Maximum speed
   float flap = 0;
   float t = 0;
@@ -31,8 +32,8 @@ class Boid implements Comparator<Boid>{
       acceleration.add(force);
   }
   int compare(Boid boid1, Boid boid2) {
-    float dist1 = boid1.position.dist(this.position);
-    float dist2 = boid2.position.dist(this.position);
+    float dist1 = PVector.dist(this.position, boid1.position); //boid1.position.dist(this.position);
+    float dist2 =  PVector.dist(this.position, boid2.position);//boid2.position.dist(this.position);
     if(dist1>dist2) {return 1;}
     else if(dist1<dist2) {return -1;}
     else {return 0;}
@@ -137,16 +138,23 @@ class Boid implements Comparator<Boid>{
     //  distance_Boid[ia] = PVector.dist(this.position, boids.get(i).position);
     //}
     Collections.sort(closestBoidsTemp, this);
+    //for (int i =0; i< closestBoidsTemp.size(); i++){
+      
+    //}
     ArrayList<Boid> closestBoids = new ArrayList();
     //int min = min(6, boids.size());
+    if (closestBoidsTemp.size() < 7){
+      closestBoids = closestBoidsTemp;
+    }
+    else{
     for(int i=0;i<6;i++) {
       closestBoids.add(closestBoidsTemp.get(i));
+    }
     }
         return closestBoids;
   }
   void update() {
     ArrayList<Boid> neighbourboids = nearestNeighbours(); 
-    System.out.println("YES");
     PVector v1 = this.rule1(neighbourboids);
     PVector v2 = this.rule2(neighbourboids);
     PVector v3 = this.rule3(neighbourboids);
@@ -170,6 +178,7 @@ class Boid implements Comparator<Boid>{
     velocity.add(wind);
     position.add(velocity);
     acceleration.mult(0);
+    
   }
 
   // void applyForce(PVector force) {
@@ -194,7 +203,8 @@ class Boid implements Comparator<Boid>{
     
     void display()
   {
-
+    this.flap = 10*sin(this.t);
+    this.t += random(0.1,0.2);
     pushMatrix();
     translate(position.x, position.y, position.z);
     rotateY(atan2(-velocity.z, velocity.x));
@@ -209,26 +219,30 @@ class Boid implements Comparator<Boid>{
     vertex(3*r,0,0);
     vertex(-3*r,2*r,0);
     vertex(-3*r,-2*r,0);
-
+//endShape();
+//beginShape(TRIANGLES);
     vertex(3*r,0,0);
     vertex(-3*r,2*r,0);
     vertex(-3*r,0,2*r);
-
+//endShape();
+//beginShape(TRIANGLES);
     vertex(3*r,0,0);
     vertex(-3*r,0,2*r);
     vertex(-3*r,-2*r,0);
-
+//endShape();
+//beginShape(TRIANGLES);
     // wings
     vertex(2*r, 0, 0);
     vertex(-1*r, 0, 0);
     vertex(-1*r, -8*r, flap);
-
+//endShape();
+//beginShape(TRIANGLES);
     vertex(2*r, 0, 0);
     vertex(-1*r, 0, 0);
     vertex(-1*r, 8*r, flap);
-
-
-    vertex(-3*r, 0, 2*r);
+//endShape();
+//beginShape(TRIANGLES);
+   vertex(-3*r, 0, 2*r);
     vertex(-3*r, 2*r, 0);
     vertex(-3*r, -2*r, 0);
     //
