@@ -8,25 +8,15 @@ PVector wind = new PVector(1,0,0);
 float zoom = -3000;
 float horiz_trans = 0;
 float av_speed_sq ;
-
+int[] arr_back = {-2500, -1700, 1000, 300};
 int messageTimer = 0;
 String messageText = "";
 float av_energy;
 
-//  initialise_positions()
-void setup() {
-  size(1920, 1080, P3D);
 
-  boids = new ArrayList<Boid>();
-  for(int i=0; i<4; i++){
-    Boid v = new Boid(random(width/10, width*9/10), random(height/10, height*9/10), random(300,900));
-    boids.add(v);
-  }
-}
-
-void settings(){
-  size(displayWidth, displayHeight, P3D);
-}
+//void settings(){
+//  size(displayWidth, displayHeight, P3D);
+//}
 
 //void mousePressed(){
 //  Boid v = new Boid(mouseX, mouseY,0);
@@ -35,36 +25,13 @@ void settings(){
 
 //}
 
-void keyPressed(){
-    //LURD
-    if (key == 'a' ){
-       for (int i = 0; i<50; i++){
-       Boid v = new Boid(mouseX, mouseY,random(300,900));
-       boids.add(v);
-       }
-    }
-    else if (keyCode == DOWN){
-        zoom -= 100;
-    }
-    else if (keyCode == UP){
-        zoom += 100;
-    }
-    //else if (keyCode == LEFT){
-    //    horiz_trans -= 100;
-    //}
-    //else if (keyCode == RIGHT){
-    //    horiz_trans += 100;
-    //}
-     
-    
-}
 
 
-void draw() {
+void draw3D() {
   background(#7ec0ee);
   beginCamera();
   camera();
-  translate(0,0,zoom);
+  translate(horiz_trans,0,zoom);
   endCamera();
   directionalLight(255,255,255, 0, 1, -100);
   
@@ -82,9 +49,15 @@ void draw() {
   //}
   //else {wind_changer = 0.56;}
   wind_changer +=0.01;
-  wind.x = 0.02*sin(wind_changer);
+  wind.x = 0.08*sin(wind_changer);
   //wind.z = 0.02*cos(wind_changer);
   //wind.z =  0.05*sin(wind_changer)* 0.05*cos(wind_changer);
+  fill(0);
+     rect (arr_back[0],arr_back[1],arr_back[2],arr_back[3],100);
+     fill(255);
+  textSize(100);
+  String back = "Back to Selection";
+   text (back, -2400, -1520);
    textSize(400);
    String num_boids = "Number of Boids: " + Integer.toString(boids.size());
    text (num_boids, -500, 700);
@@ -100,14 +73,17 @@ void draw() {
   strokeWeight(2);
   ellipse(mouse.x, mouse.y, 48, 48);
   float av_speed_sq_temp = 0;
-  for(Boid other: boids){
-     Runnable temp= new MyThread(other);
+  int n = boids.size();
+  for(int i = 0; i< n; i = i + n/10){
+     Runnable temp= new MyThread(i*10/n);
      new Thread(temp).start();
+  }
+  for (Boid other: boids){
      other.display();
      av_speed_sq_temp += (other.velocity.mag())*(other.velocity.mag());}
   // Call the appropriate steering behaviors for our agents
   // v.seek(mouse);
-  av_speed_sq =  av_speed_sq_temp ;
-  av_energy = (0.5*0.075*av_speed_sq)/(boids.size())*1000;
+    av_speed_sq =  av_speed_sq_temp ;
+    av_energy = (0.5*0.075*av_speed_sq)/(boids.size())*1000;
   
 }

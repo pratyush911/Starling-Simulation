@@ -10,7 +10,7 @@ class Boid implements Comparator<Boid>{
   float r;
   float maxce = 0.1;    // Maximum steering force
   float maxforce = 0.1;
-  float maxspeed=2.0;    // Maximum speed
+  float maxspeed=80.0;    // Maximum speed
   float flap = 0;
   float t = 0;
 
@@ -51,14 +51,15 @@ class Boid implements Comparator<Boid>{
   
   PVector rule1(ArrayList<Boid> neighbourboids){//cohesion
     PVector pc = new PVector(0,0,0);
-    int neighbours=0;
+    
     for(Boid other: neighbourboids){
-        float d = PVector.dist(position, other.position);
-        if(d<500){        
+        //float d = PVector.dist(position, other.position);
+        //if(d<500){        
           pc.add(other.position);
-          neighbours++;
-      }
+         
+      //}
     }
+    int neighbours=neighbourboids.size();
     pc.div(neighbours);
     return (pc.sub(position));//.normalize();
   }
@@ -92,10 +93,10 @@ class Boid implements Comparator<Boid>{
     for(Boid other: neighbourboids){
       //if(this!= other){
         float d = PVector.dist(position, other.position);
-        if( d<500){
+        //if( d<500){
           pv.add(velocity);
           neighbours++;
-        }
+        //}
       //}
     }
 
@@ -104,7 +105,7 @@ class Boid implements Comparator<Boid>{
     return (pv);
   }
   
-  PVector roost() {
+  PVector rule4() {
     PVector roostPos= new PVector(width/2,height/2,600);
     
     //calculate vertical force
@@ -128,21 +129,21 @@ class Boid implements Comparator<Boid>{
     steer.add(modPosDiff);
     return steer;
   }
-  
+   ArrayList<Boid> nearestneighbours_modified() {
+    ArrayList<Boid> closestBoidsTemp=new ArrayList<Boid>(boids);
+      for (int i = 0; i< boids.size(); i++){
+        float d = PVector.dist(position, boids.get(i).position);
+        if( d<500 ){//&& d>0){
+        closestBoidsTemp.add(boids.get(i));
+        }
+      }
+      return closestBoidsTemp;
+   }
     ArrayList<Boid> nearestNeighbours() {
     ArrayList<Boid> closestBoidsTemp=new ArrayList<Boid>(boids); // copy-constructor to avoid reaching out of our scope
-    closestBoidsTemp.remove(this); // avoids considering ourselves
-    
-    //float[] distance_Boid = new float[boids.size()];
-    //for (int i = 0; i< boids.size(); i++){
-    //  distance_Boid[ia] = PVector.dist(this.position, boids.get(i).position);
-    //}
+    closestBoidsTemp.remove(this); // avoids considering ourselve
     Collections.sort(closestBoidsTemp, this);
-    //for (int i =0; i< closestBoidsTemp.size(); i++){
-      
-    //}
     ArrayList<Boid> closestBoids = new ArrayList();
-    //int min = min(6, boids.size());
     if (closestBoidsTemp.size() < 7){
       closestBoids = closestBoidsTemp;
     }
@@ -154,11 +155,11 @@ class Boid implements Comparator<Boid>{
         return closestBoids;
   }
   void update() {
-    ArrayList<Boid> neighbourboids = nearestNeighbours(); 
+    ArrayList<Boid> neighbourboids = nearestneighbours_modified();//nearestNeighbours(); 
     PVector v1 = this.rule1(neighbourboids);
     PVector v2 = this.rule2(neighbourboids);
     PVector v3 = this.rule3(neighbourboids);
-    PVector v4= this.roost();
+    PVector v4= this.rule4();//roosting
     
     
       acceleration.add(PVector.mult(avoid(new PVector(position.x, 0, position.z)), 5));
