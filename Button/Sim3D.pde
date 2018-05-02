@@ -1,7 +1,7 @@
 import java.util.*;
 import java.util.Collections;
 
-int Thread_3D = 5;
+int Thread_3D = 10;
 
 ArrayList<Boid> boids3D;
 float wind_changer = 0.56;

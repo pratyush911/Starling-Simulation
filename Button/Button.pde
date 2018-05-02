@@ -5,8 +5,8 @@ import java.util.Collections;
 
 int select_2D = 0;
 int select_3D = 0;
-int[] arr_2D = {250,450,400,100, 100};
-int[] arr_3D = {750, 450,400,100, 30};
+int[] arr_2D = {250,450,400,100};
+int[] arr_3D = {750, 450,400,100};
 int[] arr_back_real = {10,10,400,100};
 
 //  initialise_positions()

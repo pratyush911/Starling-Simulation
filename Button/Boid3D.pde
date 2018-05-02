@@ -2,7 +2,7 @@ import java.util.*;
 import java.util.Comparator;
 
 
-class Boid implements Comparator<Boid>{
+class Boid {
    ArrayList<Boid> neighbourboids3D  = new ArrayList<Boid>();
    int iter;;
   PVector position;
@@ -32,13 +32,7 @@ class Boid implements Comparator<Boid>{
       // We could add mass here if we want A = F / M
       acceleration.add(force);
   }
-  int compare(Boid boid1, Boid boid2) {
-    float dist1 = PVector.dist(this.position, boid1.position); //boid1.position.dist(this.position);
-    float dist2 =  PVector.dist(this.position, boid2.position);//boid2.position.dist(this.position);
-    if(dist1>dist2) {return 1;}
-    else if(dist1<dist2) {return -1;}
-    else {return 0;}
-  }
+  
   
   PVector avoid(PVector target)
   {
