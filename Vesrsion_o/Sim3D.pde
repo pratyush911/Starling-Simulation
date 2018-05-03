@@ -14,8 +14,8 @@ float av_speed_sq ;
 int[] arr_back = {-2500, -1700, 1000, 300};
 int messageTimer = 0;
 String messageText = "";
-float av_energy;
-
+double av_energy;
+double av_momentum3D;
 void draw3D() {
   background(#7ec0ee);
   beginCamera();
@@ -57,8 +57,10 @@ void draw3D() {
    else num_display = (int)boids3D.size()*3/2;
    String num_boids3D = "Number of Boids: " + Integer.toString(num_display);
    text (num_boids3D, -500, 700);
-   String av_speed = "Average Energy: " + String.valueOf(av_energy);
+   String av_speed = "Average Energy: " + String.format("%.2f", av_energy);
    text (av_speed, -500, 1200);
+   String av_mom = "Momentum: " + String.format("%.2f", av_momentum3D);
+   text (av_mom, -500, 1700);
  
 
   PVector mouse = new PVector(mouseX, mouseY);
@@ -67,20 +69,28 @@ void draw3D() {
   fill(255);
   stroke(0);  
   strokeWeight(2);
-  ellipse(mouse.x, mouse.y, 48, 48);
+  ellipse(mouse.x, mouse.y, 10, 10);
   float av_speed_sq_temp = 0;
   int n = boids3D.size();
   for(int i = 0; i< n; i = i + n/Thread_3D){
      Runnable temp= new MyThread(i*Thread_3D/n);
      new Thread(temp).start();
   }
+  
+  PVector rCrossV = new PVector(0,0,0);
+  PVector pVector = new PVector(0,0,0);
+
   for (Boid other: boids3D){
      other.display();
      av_speed_sq_temp += (other.velocity.mag())*(other.velocity.mag());
+     
+     PVector.cross(other.position, other.velocity, rCrossV);
+     pVector.add(rCrossV);
    }
   // Call the appropriate steering behaviors for our agents
   // v.seek(mouse);
     av_speed_sq =  av_speed_sq_temp ;
-    av_energy = (0.5*0.075*av_speed_sq)/(boids3D.size())*1000;
+    av_energy = (0.5*0.075*av_speed_sq)/(boids3D.size())/2/2*30.5*30.5;
   
+    av_momentum3D = 0.075* (PVector.dist(pVector, new PVector(0,0,0)))/5*30.5;
 }

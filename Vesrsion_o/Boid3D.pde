@@ -9,9 +9,8 @@ class Boid {
   PVector velocity;
   PVector acceleration;
   float r;
-  float maxce = 0.1;    // Maximum steering force
-  float maxforce = 0.1;
-  float maxspeed=2.0;    // Maximum speed
+  float maxce = 0.2;    // Maximum steering force
+  float maxspeed=5.0;    // Maximum speed
   float flap = 0;
   float t = 0;
 
@@ -24,7 +23,6 @@ class Boid {
     velocity = new PVector(random(-0.5,0.5),random(-0.5,0.5),0);
     position = new PVector(x,y,z);
     r = 4;
-    maxforce = 0.1;
     
   }
 
@@ -34,15 +32,15 @@ class Boid {
   }
   
   
-  //PVector avoid(PVector target)
-  //{
-  //  PVector steer = new PVector(); //creates vector for steering
-  //  steer.set(PVector.sub(position, target)); //steering vector points away from target
-  //  if (true)
-  //    steer.mult(1/sq(PVector.dist(position, target)));
-  //  //steer.limit(maxSteerForce); //limits the steering force to maxSteerForce
-  //  return steer;
-  //}
+  PVector avoid(PVector target)
+  {
+    PVector steer = new PVector(); //creates vector for steering
+    steer.set(PVector.sub(position, target)); //steering vector points away from target
+    
+      steer.mult(1/sq(PVector.dist(position, target)));
+    //steer.limit(maxSteerForce); //limits the steering force to maxSteerForce
+    return steer;
+  }
   
   PVector rule1(){//cohesion
     PVector pc = new PVector(0,0,0);
@@ -55,21 +53,20 @@ class Boid {
          
       }
     }
-    //int neighbours=neighbourboids3D.size();
     if (neighbours>0){
-        pc.div(neighbours);
-    return (pc.setMag(0.05));}//.normalize();
-        //return (rule5(pc));}
-    else 
-      return new PVector(0,0,0);
+        pc.div((float)neighbours);
+    }
+    PVector steer = pc.sub(position);
+    steer.limit(maxce);
+    return steer;
   }
 
   PVector rule2(){//separation
     PVector c = new PVector(0,0,0);
-  int count = 0;
+    int count = 0;
     for(Boid other: neighbourboids3D){
         float d = PVector.dist(position, other.position);
-        if(d>0 && d<25){
+        if(d>0 && d<500){
           PVector  br = PVector.sub(position, other.position);
           br.normalize();
           br.div(d);
@@ -78,21 +75,6 @@ class Boid {
         }
       
     }
-    if (count > 0) {
-      c.div((float)count);
-    }
-
-    if (c.mag() > 0) {
-      c.normalize();
-      c.mult(maxspeed);
-      c.sub(velocity);
-      c.limit(maxforce);
-    }
-
-    //c.normalize();
-    //c.mult(maxspeed);
-    //c.sub(velocity);
-    //c.limit(maxforce);
     return c;
   }
 
@@ -102,29 +84,20 @@ class Boid {
     int neighbours=0;
 
     for(Boid other: neighbourboids3D){
-      //if(this!= other){
         float d = PVector.dist(position, other.position);
         if( d<500 && d!=0){
           PVector temp  = new PVector(other.velocity.x,other.velocity.y,other.velocity.z ) ;
-          temp.normalize();
-          temp.div(d); 
+          //temp.normalize();
+          //temp.div(d); 
           pv.add(temp);
           neighbours++;
         }
-      //}
     }
 
-    //if (neighbours > 0) {
-    //    pv.div((float)neighbours);
-    //    pv.normalize();
-    //    pv.mult(maxspeed);
-    //    PVector steer = PVector.sub(pv, velocity);
-    //    steer.limit(maxforce);
-    //    return steer;
-    //  } 
-    //  else {
-    //    return new PVector(0, 0, 0);
-    //  }
+    if (neighbours > 0) {
+        pv.div((float)neighbours);
+        pv.limit(maxce);
+    }
     return pv;
   }
   
@@ -154,6 +127,8 @@ class Boid {
     steer.add(modPosDiff);
     return steer;
   }
+  
+  
   PVector rule6() {//avoidance
     PVector steer = new PVector(0, 0, 0);
     int count = 0;
@@ -183,9 +158,9 @@ class Boid {
     desired.mult(maxspeed);
     // Steering = Desired minus Velocity
     PVector steer = PVector.sub(desired, velocity);
-    steer.limit(maxforce);  // Limit to maximum steering force
+    steer.limit(maxce);  // Limit to maximum steering force
     return steer;
-}
+  }
 
 
    ArrayList<Boid> nearestneighbours_modified() {
@@ -198,76 +173,48 @@ class Boid {
       }
       return closestBoidsTemp;
    }
-  //  ArrayList<Boid> nearestNeighbours() {
-  //  ArrayList<Boid> closestBoidsTemp=new ArrayList<Boid>(boids3D); // copy-constructor to avoid reaching out of our scope
-  //  closestBoidsTemp.remove(this); // avoids considering ourselve
-  //  Collections.sort(closestBoidsTemp, this);
-  //  ArrayList<Boid> closestBoids = new ArrayList();
-  //  if (closestBoidsTemp.size() < 7){
-  //    closestBoids = closestBoidsTemp;
-  //  }
-  //  else{
-  //  for(int i=0;i<6;i++) {
-  //    closestBoids.add(closestBoidsTemp.get(i));
-  //  }
-  //  }
-  //      return closestBoids;
-  //}
+
   void update() {
     
-     //if (iter>10){
       neighbourboids3D = nearestneighbours_modified(); 
-    //  iter = 0;
-    //}
-    //else iter ++;
+
     PVector v1 = this.rule1();
     PVector v2 = this.rule2();
     PVector v3 = this.rule3();
     PVector v4= this.rule4();//roosting
     PVector v6 = this.rule6();
     
+      //They dont want to hit the ground this is the upthrust generated by the boids
+      acceleration.add(PVector.mult(avoid(new PVector(position.x, 0, position.z)), 5));
+
+      //They can attain a ceratin height according to their oxygen level intake
+      acceleration.add(PVector.mult(avoid(new PVector(position.x, height, position.z)), 5));
+      
+      //They remain in a region and don't want to go out of it.
+      acceleration.add(PVector.mult(avoid(new PVector(width, position.y, position.z)), 4));
+      acceleration.add(PVector.mult(avoid(new PVector(0, position.y, position.z)), 4));
+      acceleration.add(PVector.mult(avoid(new PVector(position.x, position.y, 300)), 4));
+      acceleration.add(PVector.mult(avoid(new PVector(position.x, position.y, 900)), 4));
     
-      //acceleration.add(PVector.mult(avoid(new PVector(position.x, 0, position.z)), 5));
-      //acceleration.add(PVector.mult(avoid(new PVector(position.x, height, position.z)), 5));
-      //acceleration.add(PVector.mult(avoid(new PVector(width, position.y, position.z)), 0.1));
-      //acceleration.add(PVector.mult(avoid(new PVector(0, position.y, position.z)), 0.1));
-      //acceleration.add(PVector.mult(avoid(new PVector(position.x, position.y, 300)), 0.1));
-      //acceleration.add(PVector.mult(avoid(new PVector(position.x, position.y, 900)), 0.1));
-    
-    //applyForce(v1.mult(1));
-    ////applyForce(v2.mult(1.5));
+    applyForce(v1.mult(1.5));
+    applyForce(v2.mult(2.5));
     applyForce(v3.mult(1));
-    applyForce(v4.mult(0.1));
-    //applyForce(v6.mult(1));
-    acceleration.limit(maxforce);
+    applyForce(v4.mult(1));
+    PVector v5 = new PVector(0,0,0);
+    if (seekMouse == 1)
+      v5 = this.rule5(new PVector(mouseX, mouseY, 0));
+    applyForce(v5.mult(6));
+    acceleration.limit(maxce);
+    
     velocity.add(acceleration);
+    if (windOn == 1)
+      velocity.add(wind);
     velocity.limit(maxspeed);
-    //velocity.add(wind);
     position.add(velocity);
-    position.add(v1.mult(1));
     acceleration.mult(0);
     
   }
 
-  // void applyForce(PVector force) {
-  //   // We could add mass here if we want A = F / M
-  //   acceleration.add(force);
-  // }
-
-  // A method that calculates a steering force towards a target
-  // STEER = DESIRED MINUS VELOCITY
-  // void seek(PVector target) {
-  //   PVector desired = PVector.sub(target,position);  // A vector pointing from the position to the target
-    
-  //   // Scale to maximum speed
-  //   desired.setMag(maxspeed);
-
-  //   // Steering = Desired minus velocity
-  //   PVector steer = PVector.sub(desired,velocity);
-  //   steer.limit(maxforce);  // Limit to maximum steering force
-    
-  //   applyForce(steer);
-  // }
     
     void display()
   {
@@ -315,7 +262,6 @@ class Boid {
     vertex(-3*r, -2*r, 0);
     //
     endShape();
-    //box(10);
     popMatrix();
   }
 }

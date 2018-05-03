@@ -9,6 +9,9 @@ int[] arr_2D = {250,450,400,100};
 int[] arr_3D = {750, 450,400,100};
 int[] arr_back_real = {10,10,400,100};
 
+int seekMouse =0;
+int windOn = 0;
+
 //  initialise_positions()
 void setup() {
   size(1920, 1080, P3D);
@@ -41,8 +44,33 @@ void keyPressed(){
        
        }
     }
-    
-
+    //Mouse seek with 's'
+    else if (key == 's'){
+      if(seekMouse == 0)
+      seekMouse = 1;
+      else
+      seekMouse = 0;
+    }
+    //Mouse windOn with 'w'
+    else if (key == 'w'){
+      if(windOn == 0)
+      windOn = 1;
+      else
+      windOn = 0;
+    }
+    //Mouse obstacle with 'o'
+    else if (key == 'o'){
+        // Draw an ellipse at the mouse position
+        fill(200);
+        stroke(0);  
+        strokeWeight(2);
+      synchronized(obstacles) {
+      PVector p = new PVector(mouseX, mouseY);
+      obstacles.add(p);
+      }
+    }
+    else if (key == 'e')
+      obstacles = new ArrayList<PVector>();
     else if (keyCode == DOWN && select_3D == 1){
         zoom -= 100;
     }
@@ -103,6 +131,7 @@ void mousePressed(){
      select_2D = 1;
      select_3D = 0;
      boids2D = new ArrayList<Boid2D>();
+     obstacles = new ArrayList<PVector>();
     for(int i=0; i<100; i++){
       Boid2D v = new Boid2D(random(width/10, width), random(height/10, height));//(random(-2*width, 2*width), random(-2*height, 2*height));
       boids2D.add(v);
