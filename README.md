@@ -9,21 +9,19 @@ But this type of complex motion is rarely seen in computer animation. The simula
 An agent-based model and simulation of starling murmuration. 
 
 ##Autonomous Agents
-We use the term \textit{Autonomous Agents} to signify an individual that decides its behaviour in a given situation without the guidance from a leader or a pre-defined objective that each member of the swarm needs to comply with. Some of the important characteristics of an autonomous agent can be summarized as:
 
-\begin{enumerate}
-\item \textbf{Processing environment to determine action:} This is the more acceptable part. As discussed in preceding sections, autonomous agents take information of other actors from the environment to calculate the force that they need to apply internally to be able to modify their state of motion. They do not act in accordance with any one final end goal.
-\item \textbf{Limited Perception of the environment:} Any autonomous agent simulated in a real-world environment is driven by the behaviour of other actors in the environment. However, an important consideration is : \textit{How much can an autonomous agent perceive?} Given that there is a limit to which any Starling can learn from its surroundings, it is inappropriate to include information of every actor in the environment, to determine the motion of  an autonomous agent. There are various techniques, such as most proximal seven, or 150 \degree radar with limited viewing distance. The approach is discussed in further sections.
-\item \textbf{No Single Leader:} Flocking in Starlings stems from the principles of collective awareness and intelligence. No single actor determines the motion of the others, yet all the Starlings seem to be flocking in a highly synchronised fashion.
+We use the term Autonomous Agents to signify an individual that decides its behaviour in a given situation without the guidance from a leader or a pre-defined objective that each member of the swarm needs to comply with. Some of the important characteristics of an autonomous agent can be summarized as:
+
+
+1. Processing environment to determine action: This is the more acceptable part. As discussed in preceding sections, autonomous agents take information of other actors from the environment to calculate the force that they need to apply internally to be able to modify their state of motion. They do not act in accordance with any one final end goal.
+
+2. Limited Perception of the environment: Any autonomous agent simulated in a real-world environment is driven by the behaviour of other actors in the environment. However, an important consideration is : How much can an autonomous agent perceive? Given that there is a limit to which any Starling can learn from its surroundings, it is inappropriate to include information of every actor in the environment, to determine the motion of  an autonomous agent. There are various techniques, such as most proximal seven, or 150 degree radar with limited viewing distance. The approach is discussed in further sections.
+
+3. No Single Leader: Flocking in Starlings stems from the principles of collective awareness and intelligence. No single actor determines the motion of the others, yet all the Starlings seem to be flocking in a highly synchronised fashion.
 
 ## Theory
 The model is based overwhelmingly on the paper 'Self-organized aerial displays of thousands of starlings: a model' by H. Hildenbrandt C. Carere and C.K. Hemelrijka. It's available for free [here](https://academic.oup.com/beheco/article/21/6/1349/333856).
 
-## History
-I made this as my project for MATH 437 Mathematical Methods in Biology at McGill University in the 2017 Winter Term with Aashna Uppal.
-
-## starlings_topology
-This is the 'culmination' of the project and includes most of the features discussed in the paper above as well as a few (I feel) nicer implementations.
 
 ### To run
 Download the most recent version of [Processing 3](https://processing.org/) and the rest will be plug-in and play.
