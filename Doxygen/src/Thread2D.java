@@ -1,3 +1,4 @@
+
 import java.util.*;
 class MyThread2D implements Runnable { 
   int thread_num;

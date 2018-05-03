@@ -1,7 +1,7 @@
 import java.util.*;
 import java.util.Comparator;
 float avoidRadius = 25;
-float nearestRaius  =60;
+float nearestRaius  = 60;
 float crowdRadius = 50;
 
 

@@ -1,8 +1,9 @@
 import java.util.*;
 import java.util.Collections;
 
+int Thread_3D = 5;
 
-ArrayList<Boid> boids;
+ArrayList<Boid> boids3D;
 float wind_changer = 0.56;
 PVector wind = new PVector(1,0,0);
 float zoom = -3000;
@@ -12,20 +13,6 @@ int[] arr_back = {-2500, -1700, 1000, 300};
 int messageTimer = 0;
 String messageText = "";
 float av_energy;
-
-
-//void settings(){
-//  size(displayWidth, displayHeight, P3D);
-//}
-
-//void mousePressed(){
-//  Boid v = new Boid(mouseX, mouseY,0);
-//  boids.add(v);
-//  System.out.println("here123");
-
-//}
-
-
 
 void draw3D() {
   background(#7ec0ee);
@@ -49,7 +36,7 @@ void draw3D() {
   //}
   //else {wind_changer = 0.56;}
   wind_changer +=0.01;
-  wind.x = 0.08*sin(wind_changer);
+  wind.x = 0.02*sin(wind_changer);
   //wind.z = 0.02*cos(wind_changer);
   //wind.z =  0.05*sin(wind_changer)* 0.05*cos(wind_changer);
   fill(0);
@@ -59,8 +46,8 @@ void draw3D() {
   String back = "Back to Selection";
    text (back, -2400, -1520);
    textSize(400);
-   String num_boids = "Number of Boids: " + Integer.toString(boids.size());
-   text (num_boids, -500, 700);
+   String num_boids3D = "Number of Boids: " + Integer.toString(boids3D.size());
+   text (num_boids3D, -500, 700);
    String av_speed = "Average Energy: " + String.valueOf(av_energy);
    text (av_speed, -500, 1200);
  
@@ -73,17 +60,17 @@ void draw3D() {
   strokeWeight(2);
   ellipse(mouse.x, mouse.y, 48, 48);
   float av_speed_sq_temp = 0;
-  int n = boids.size();
-  for(int i = 0; i< n; i = i + n/10){
-     Runnable temp= new MyThread(i*10/n);
+  int n = boids3D.size();
+  for(int i = 0; i< n; i = i + n/Thread_3D){
+     Runnable temp= new MyThread(i*Thread_3D/n);
      new Thread(temp).start();
   }
-  for (Boid other: boids){
+  for (Boid other: boids3D){
      other.display();
      av_speed_sq_temp += (other.velocity.mag())*(other.velocity.mag());}
   // Call the appropriate steering behaviors for our agents
   // v.seek(mouse);
     av_speed_sq =  av_speed_sq_temp ;
-    av_energy = (0.5*0.075*av_speed_sq)/(boids.size())*1000;
+    av_energy = (0.5*0.075*av_speed_sq)/(boids3D.size())*1000;
   
 }

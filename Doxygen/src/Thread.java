@@ -6,9 +6,9 @@ class MyThread implements Runnable {
   }
 
   public void run() { 
-   int temp_n = boids.size();
-   for (int j = 0; j< temp_n/10; j++){
-     boids.get(j + temp_n*thread_num/10  ).update();
+   int temp_n = boids3D.size();
+   for (int j = 0; j< temp_n/Thread_3D; j++){
+     boids3D.get(j + temp_n*thread_num/Thread_3D  ).update();
    }
     
    
